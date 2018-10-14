@@ -1,0 +1,138 @@
+<template>
+  <view class="container">
+    <view class="userinfo">
+      <image class="userinfo-avatar" src="{{ userInfo.avatarUrl }}" background-size="cover"/>
+      <view class="userinfo-nickname">{{ userInfo.nickName }}</view>
+    </view>
+    <view class="section-input">
+      <form bindsubmit="submitMessage">
+        <textarea class="input" placeholder="你想讲乜鸠嘢啊" auto-focus name="message" />
+        <view class="btn-wrapper">
+          <button form-type="submit" wx:if="{{ !messageId }}">生成凭证</button>
+          <button open-type="share" wx:else>分享</button>
+        </view>
+      </form>
+    </view>
+
+    
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import Toast from 'wepy-com-toast'
+  import Cgi from '../services/cgi'
+  import testMixin from '../mixins/test'
+  import CONS from '../constants'
+
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarTitleText: 'One Look'
+    }
+    components = {
+      toast: Toast
+    }
+
+    mixins = [testMixin]
+
+    data = {
+      userInfo: {},
+      messageId: undefined,
+      message: ''
+    }
+
+    methods = {
+      submitMessage (e) {
+        const msg = e.detail.value.message
+        if (!msg) {
+          wx.showToast({
+            title: '说点东西吧',
+            icon: 'none',
+            duration: 1500
+          })
+          return
+        }
+
+        const openid = wx.getStorageSync(CONS.CACHE.OPENID)
+        Cgi.message.create({
+          content: msg,
+          nickname: this.userInfo.nickName,
+          avatar: this.userInfo.avatarUrl,
+          openid
+        }).then(data => {
+          console.log('创建信息成功 %o', data)
+          this.messageId = data.id
+          wx.showToast({
+            title: '生成成功，可以分享了',
+            icon: 'none',
+            duration: 1500
+          })
+          this.$apply()
+        }).catch(() => {
+          wx.showToast({
+            title: '未知领域',
+            icon: 'none',
+            duration: 1500
+          })
+        })
+      },
+
+      onShareAppMessage () {
+        return {
+          title: '讲个秘密俾你知',
+          path: `/pages/display?messageId=${this.messageId}`,
+          imageUrl: '/images/yyt.jpeg'
+        }
+      }
+    }
+
+    onLoad (options) {
+      console.log('[Page index] onLoad %o', options)
+      this.$parent.getUserInfo(userInfo => {
+        this.userInfo = userInfo
+        this.$apply()
+      })
+    }
+  }
+</script>
+
+<style lang="less">
+  .userinfo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .userinfo-avatar {
+    width: 80rpx;
+    height: 80rpx;
+    border-radius: 50%;
+  }
+
+  .userinfo-nickname {
+    color: #aaa;
+  }
+
+  .section-input {
+    margin-top: 50rpx;
+    display: flex;
+    flex-direction: column;
+
+    .input {
+      background-color: #eee;
+      border-radius: 10rpx;
+      padding: 20rpx 10rpx;
+    }
+
+    .btn-wrapper {
+      margin-top: 40rpx;
+      width: 100%;
+    }
+
+    button {
+      font-size: 40rpx;
+      height: 100rpx;
+      width: 240rpx;
+    }
+  }
+</style>

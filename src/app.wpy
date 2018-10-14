@@ -1,0 +1,79 @@
+<style lang="less">
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+</style>
+
+<script>
+import wepy from 'wepy'
+import 'wepy-async-function'
+import Cgi from './services/cgi'
+import CONS from './constants'
+
+export default class extends wepy.app {
+  config = {
+    pages: [
+      'pages/index',
+      'pages/test',
+      'pages/auth',
+      'pages/display'
+    ],
+    window: {
+      backgroundTextStyle: 'light',
+      navigationBarBackgroundColor: '#fff',
+      navigationBarTitleText: 'WeChat',
+      navigationBarTextStyle: 'black'
+    }
+  }
+
+  globalData = {
+    userInfo: null
+  }
+
+  constructor () {
+    super()
+    this.use('promisify')
+    this.use('requestfix')
+  }
+
+  onLaunch () {
+    console.log('[App] onLaunch')
+    wx.login({
+      timeout: 3000,
+      success: res => {
+        console.log('[wechat login] success %o', res)
+        Cgi.login(res.code).then(res => {
+          console.log('[rcrab login] success %o', res)
+          wx.setStorageSync(CONS.CACHE.OPENID, res.data.openid)
+        })
+      }
+    })
+    wx.hideShareMenu()
+    this.getUserInfo()
+  }
+
+  getUserInfo (cb) {
+    if (this.globalData.userInfo) {
+      cb && cb(this.globalData.userInfo)
+    }
+    wx.getUserInfo({
+      success: res => {
+        console.log('[wx.getUserInfo] %o', res)
+        this.globalData.userInfo = res.userInfo
+        cb && cb(res.userInfo)
+      },
+      fail () {
+        console.log('redirect to auth page')
+        wx.redirectTo({
+          url: '/pages/auth'
+        })
+      }
+    })
+  }
+}
+</script>

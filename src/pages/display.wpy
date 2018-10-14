@@ -1,0 +1,124 @@
+<template>
+  <view class="container">
+    <view class="userinfo">
+      <image class="userinfo-avatar" src="{{ message.sender_avatar }}" background-size="cover"/>
+      <view class="userinfo-nickname">{{ message.sender_name }}</view>
+    </view>
+    <view class="section-detail" wx:if="{{ !message.destroy_flag }}">
+      <text>{{ detail }}</text>
+    </view>
+    <image class="fbi-warning" src="../images/fbi-warning.png" />
+    <text class="txt-notify" wx:if="{{ !message.destroy_flag }}">阅后即焚哦</text>
+    <text class="txt-notify" wx:if="{{ message.destroy_flag && !isSender }}">该消息已被阅</text>
+    <view class="sender-check" wx:if="{{ message.destroy_flag && isSender }}">
+      <text>您的消息已被</text>
+      <image class="userinfo-avatar" src="{{ message.terminator_avatar }}" />
+      <text style="color: #445c95;">({{ message.terminator_name }})</text>
+      <text>阅读</text>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import Cgi from '../services/cgi'
+  import CONS from '../constants'
+
+  export default class Display extends wepy.page {
+    data = {
+      messageId: '',
+      message: {},
+      detail: '',
+      isSender: false // 是否为发送者自己
+    }
+
+    methods = {}
+
+    onShow () {
+      console.log('[Page display] onShow')
+      if (!this.messageId || this.message.destroy_flag) {
+        return
+      }
+      const openid = wx.getStorageSync(CONS.CACHE.OPENID)
+      Cgi.message.query(this.messageId).then(data => {
+        console.log('消息详情 %o', data)
+        this.message = data
+        this.detail = data.content
+        this.isSender = openid === data.sender_openid
+
+        // 擦除信息
+        if (!this.isSender && !this.message.destroy_flag) {
+          this.$parent.getUserInfo(userInfo => {
+            Cgi.message.destroy({
+              mid: this.messageId,
+              nickname: userInfo.nickName,
+              avatar: userInfo.avatarUrl
+            })
+            .then(() => {
+              console.log('清除信息成功')
+            })
+            .catch(e => {
+              console.warn('[FBI WARNING] 清除信息失败 %o', e)
+            })
+          })
+        }
+        this.$apply()
+      })
+    }
+
+    onLoad (options) {
+      console.log('[Page display] onLoad %o', options)
+      this.messageId = options.messageId
+    }
+  }
+
+</script>
+<style lang="less">
+  .userinfo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .userinfo-avatar {
+    width: 80rpx;
+    height: 80rpx;
+    border-radius: 50%;
+  }
+
+  .userinfo-nickname {
+    color: #aaa;
+  }
+
+  .section-detail {
+    margin: 50rpx 100rpx;
+    padding: 20rpx;
+    width: 80%;
+    height: 400rpx;
+    border-radius: 20rpx;
+    background: #f5f5f5;
+
+    text {
+      font-size: 50rpx;
+      color: #445c95;
+    }
+  }
+
+  .fbi-warning {
+    width: 300rpx;
+    height: 70rpx;
+    border-radius: 10rpx;
+    margin-top: 80rpx;
+  }
+
+  .txt-notify {
+    margin-top: 40rpx;
+    font-size: 40rpx;
+  }
+
+  .sender-check {
+    margin-top: 40rpx;
+    display: flex;
+    flex-direction: row;
+  }
+</style>
