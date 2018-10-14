@@ -25,6 +25,9 @@
   import CONS from '../constants'
 
   export default class Display extends wepy.page {
+    config = {
+      navigationBarTitleText: 'One Look'
+    }
     data = {
       messageId: '',
       message: {},

@@ -8,6 +8,9 @@
   import wepy from 'wepy'
 
   export default class Auth extends wepy.page {
+    config = {
+      navigationBarTitleText: '授权'
+    }
     methods = {
       bindGetUserInfo (e) {
         console.log('auth success %o', e.detail.userInfo)
