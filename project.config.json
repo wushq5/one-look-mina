@@ -1,7 +1,7 @@
 {
 	"description": "One-look mina",
 	"setting": {
-		"urlCheck": false,
+		"urlCheck": true,
 		"es6": false,
 		"postcss": false,
 		"minified": false,
@@ -28,12 +28,18 @@
 			"list": []
 		},
 		"miniprogram": {
-			"current": 0,
+			"current": 1,
 			"list": [
 				{
 					"id": 0,
 					"name": "查看消息",
 					"pathName": "pages/display",
+					"query": "messageId=10"
+				},
+				{
+					"id": -1,
+					"name": "指定参数",
+					"pathName": "pages/index",
 					"query": "messageId=10"
 				}
 			]

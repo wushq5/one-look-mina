@@ -6,10 +6,10 @@
     </view>
     <view class="section-input">
       <form bindsubmit="submitMessage">
-        <textarea class="input" placeholder="你想讲乜鸠嘢啊" auto-focus name="message" />
+        <textarea class="input" placeholder="你想讲乜嘢啊" auto-focus name="message" />
         <view class="btn-wrapper">
-          <button form-type="submit" wx:if="{{ !messageId }}">生成凭证</button>
-          <button open-type="share" wx:else>分享</button>
+          <button class="btn" form-type="submit" wx:if="{{ !messageId }}">生成凭证</button>
+          <button class="btn" open-type="share" wx:else>分享</button>
         </view>
       </form>
     </view>
@@ -130,9 +130,9 @@
     }
 
     button {
-      font-size: 40rpx;
       height: 100rpx;
-      width: 240rpx;
+      width: 500rpx;
+      border-radius: 50rpx;
     }
   }
 </style>

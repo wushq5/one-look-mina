@@ -1,22 +1,36 @@
 <template>
   <view class="container">
-    <button open-type="getUserInfo" bindgetuserinfo="bindGetUserInfo">授权登录</button>
+    <text>需要获取你的头像昵称信息</text>
+    <button class="btn" open-type="getUserInfo" bindgetuserinfo="bindGetUserInfo">授权登录</button>
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
+  import Utils from '../services/utils'
 
   export default class Auth extends wepy.page {
     config = {
       navigationBarTitleText: '授权'
     }
+
     methods = {
       bindGetUserInfo (e) {
         console.log('auth success %o', e.detail.userInfo)
-        wx.navigateBack()
+        const opts = this.$parent.globalData.startupOptions
+        wx.redirectTo({
+          url: '/' + Utils.addParamsToUrl(opts.path, opts.query)
+        })
       }
     }
   }
 
 </script>
+<style>
+  button {
+    margin-top: 40rpx;
+    height: 100rpx;
+    width: 500rpx;
+    border-radius: 50rpx;
+  }
+</style>

@@ -7,6 +7,15 @@
   justify-content: space-between;
   box-sizing: border-box;
 }
+.btn {
+  background: #f29360;
+  color: #fff;
+  font-size: 40rpx;
+}
+.button-hover {
+  background: #f2f2f2;
+  opacity: 0.5;
+}
 </style>
 
 <script>
@@ -32,7 +41,8 @@ export default class extends wepy.app {
   }
 
   globalData = {
-    userInfo: null
+    userInfo: null,
+    startupOptions: null
   }
 
   constructor () {
@@ -54,6 +64,11 @@ export default class extends wepy.app {
       }
     })
     wx.hideShareMenu()
+  }
+
+  onShow (options) {
+    console.log('[App] onShow %o', options)
+    this.globalData.startupOptions = options
     this.getUserInfo()
   }
 
